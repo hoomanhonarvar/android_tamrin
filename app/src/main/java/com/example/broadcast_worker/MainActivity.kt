@@ -79,6 +79,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onDestroy() {
+        sendBroadcast(Intent(applicationContext, ForegroundNetworkService::class.java)
+            .also {
+                it.action = ForegroundNetworkService.Actions.STOP.toString()
+                startService(it)})
+        super.onDestroy()
+
+    }
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
