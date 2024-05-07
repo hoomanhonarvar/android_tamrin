@@ -1,46 +1,40 @@
 package com.example.broadcast_worker
 
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.broadcast_worker.reciever.AirPlaneModeReceiver
 import com.example.broadcast_worker.ui.theme.Broadcast_workerTheme
+import android.util.Log
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.lifecycleScope
+import com.example.broadcast_worker.reciever.network.NetworkReceiver
+import com.example.broadcast_worker.reciever.network.NetworkStatus
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class MainActivity : ComponentActivity() {
-    private val airPlaneModeReceiver = AirPlaneModeReceiver()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        registerReceiver(
-            airPlaneModeReceiver,
-            IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED)
-        )
+        val networkReceiver = NetworkReceiver(applicationContext)
+        networkReceiver.observe().onEach {
+            Log.i("network_hooman","status is $it")
+        }.launchIn(lifecycleScope)
+
+
         setContent {
+            val networkCallback by networkReceiver.observe().collectAsState(
+                initial = NetworkStatus.UnAvailable)
+
             Broadcast_workerTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Text("AirPlane Broadcast Receiver")
-                }
+                Text("$networkCallback")
             }
         }
     }
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(airPlaneModeReceiver)
-    }
-}
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
@@ -56,4 +50,5 @@ fun GreetingPreview() {
     Broadcast_workerTheme {
         Greeting("Android")
     }
+}
 }
