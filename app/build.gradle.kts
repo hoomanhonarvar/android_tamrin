@@ -51,6 +51,7 @@ android {
 
 dependencies {
 
+    implementation("androidx.core:core-ktx:1.13.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.9.0")
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
@@ -58,7 +59,6 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    implementation("com.google.android.gms:play-services-appindexing:9.8.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -66,31 +66,7 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-//    val core_version = "1.13.1"
-//
-//    // Java language implementation
-//    implementation("androidx.core:core:$core_version")
-//    // Kotlin
-//    implementation("androidx.core:core-ktx:$core_version")
-//
-//    // To use RoleManagerCompat
-//    implementation("androidx.core:core-role:1.0.0")
-//
-//    // To use the Animator APIs
-//    implementation("androidx.core:core-animation:1.0.0")
-//    // To test the Animator APIs
-//    androidTestImplementation("androidx.core:core-animation-testing:1.0.0")
-//
-//    // Optional - To enable APIs that query the performance characteristics of GMS devices.
-//    implementation("androidx.core:core-performance:1.0.0")
-//
-//    // Optional - to use ShortcutManagerCompat to donate shortcuts to be used by Google
-//    implementation("androidx.core:core-google-shortcuts:1.1.0")
-//
-//    // Optional - to support backwards compatibility of RemoteViews
-//    implementation("androidx.core:core-remoteviews:1.1.0-beta02")
-//
-//    // Optional - APIs for SplashScreen, including compatibility helpers on devices prior Android 12
-//    implementation("androidx.core:core-splashscreen:1.2.0-alpha01")
-
+    implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.compose.runtime:runtime-livedata:1.6.4")
 }
