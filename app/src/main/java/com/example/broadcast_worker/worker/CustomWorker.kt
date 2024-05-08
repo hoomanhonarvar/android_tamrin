@@ -9,12 +9,27 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.delay
 
 class CustomWorker constructor(
-    context: Context,
+    context_: Context,
     workerParameters: WorkerParameters,
-): CoroutineWorker(context, workerParameters) {
+): CoroutineWorker(context_, workerParameters) {
+    private val special_context=context_
     override suspend fun doWork(): Result {
-        delay(20000)
-        Log.d("Custom Worker", "working!!")
+        if(isAirplaneModeOn(special_context) ){
+            if(isBluetoothOn(special_context)){
+                Log.d("worker_airplane", "AirPlane mode is ON and Bluetooth is ON ")
+            }
+            else{
+                Log.d("worker_airplane", "AirPlane mode is ON and Bluetooth is OFF ")
+            }
+        }
+        else{
+            if(isBluetoothOn(special_context)){
+                Log.d("worker_airplane", "AirPlane mode is OFF and Bluetooth is ON ")
+            }
+            else{
+                Log.d("worker_airplane", "AirPlane mode is OFF and Bluetooth is OFF ")
+            }
+        }
         return Result.success()
     }
 

@@ -36,8 +36,11 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 LaunchedEffect(key1 = Unit) {
                     val workRequest = PeriodicWorkRequestBuilder<CustomWorker>(
-                        repeatInterval = 1,
-                        repeatIntervalTimeUnit = TimeUnit.MINUTES,
+                        repeatInterval = 2,
+                        repeatIntervalTimeUnit = TimeUnit.MINUTES
+                        ,1
+                        ,TimeUnit.SECONDS
+
                     ).setBackoffCriteria(
                         backoffPolicy = BackoffPolicy.LINEAR,
                         duration = Duration.ofSeconds(15)
