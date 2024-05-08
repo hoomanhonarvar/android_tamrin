@@ -66,17 +66,3 @@ fun GreetingPreview() {
         Greeting("Android")
     }
 }
-@Suppress("deprecation", "DEPRECATED_IDENTITY_EQUALS")
-fun isAirplaneModeOn(context: Context): Boolean {
-    return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-        Settings.System.getInt(
-            context.contentResolver,
-            Settings.System.AIRPLANE_MODE_ON, 0
-        ) !== 0
-    } else {
-        Settings.Global.getInt(
-            context.contentResolver,
-            Settings.Global.AIRPLANE_MODE_ON, 0
-        ) !== 0
-    }
-}
