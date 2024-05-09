@@ -1,9 +1,11 @@
 package com.example.broadcast_worker
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.FileObserver
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Text
@@ -17,11 +19,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.work.BackoffPolicy
@@ -33,6 +43,8 @@ import com.example.broadcast_worker.service.ForegroundNetworkService
 import com.example.broadcast_worker.worker.CustomWorker
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.json.JSONObject
+import java.io.File
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
@@ -91,30 +103,50 @@ class MainActivity : ComponentActivity() {
                         })
                 }
             }
+
+
+
             Broadcast_workerTheme {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text("network status is :$networkCallback")
+                Surface {
+                    LaunchedEffect(key1 = Unit) {
+                        val workRequest = PeriodicWorkRequestBuilder<CustomWorker>(
+                            repeatInterval = 2,
+                            repeatIntervalTimeUnit = TimeUnit.MINUTES, 1, TimeUnit.SECONDS
+
+                        ).setBackoffCriteria(
+                            backoffPolicy = BackoffPolicy.LINEAR,
+                            duration = Duration.ofMinutes(2)
+                        ).build()
+
+                        val workManager = WorkManager.getInstance(applicationContext)
+                        workManager.enqueue(workRequest)
+                    }
+                    val logs = remember { mutableStateOf(readLogsFromFile(this)) }
+
+                    val observer = remember {
+                        LogFileObserver(this) {
+                            logs.value = readLogsFromFile(this)
+                        }
+                    }
+
+                    DisposableEffect(this) {
+                        observer.startWatching()
+                        onDispose {
+                            observer.stopWatching()
+                        }
+                    }
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+
+                    ) {
+                        items(logs.value) { log ->
+                            Text(text = log)
+                            Divider()
+                        }
+                    }
                 }
 
-                LaunchedEffect(key1 = Unit) {
-                    val workRequest = PeriodicWorkRequestBuilder<CustomWorker>(
-                        repeatInterval = 2,
-                        repeatIntervalTimeUnit = TimeUnit.MINUTES
-                        ,1
-                        ,TimeUnit.SECONDS
-
-                    ).setBackoffCriteria(
-                        backoffPolicy = BackoffPolicy.LINEAR,
-                        duration = Duration.ofSeconds(15)
-                    ).build()
-
-                    val workManager = WorkManager.getInstance(applicationContext)
-                    workManager.enqueue(workRequest)
-                }
             }
         }
     }
@@ -144,3 +176,42 @@ fun GreetingPreview() {
         Greeting("Android")
     }
 }
+
+fun readLogsFromFile(context: Context): List<String> {
+    val logFile = File(context.filesDir, "logs.txt")
+    val logs = mutableListOf<String>()
+
+    if (logFile.exists()) {
+        logFile.useLines { lines ->
+            lines.forEach { line ->
+                val jsonObject = JSONObject(line)
+                val time = jsonObject.getString("time")
+                val bluetooth= jsonObject.getBoolean("bluetooth")
+                val airplane = jsonObject.getBoolean("airplane")
+
+                val logMessage =
+                    "time: ${time}\nBluetooth is ${if (bluetooth) "Enabled" else "Disabled"},\nAirplane mode is" + " ${
+                        if
+                                (airplane) "On" else "Off"
+                    }"
+                logs.add(logMessage)
+            }
+        }
+    }
+
+    return logs.reversed()
+
+}
+
+class LogFileObserver(
+    private val context: Context,
+    private val callback: () -> Unit
+) : FileObserver(context.filesDir.path + "./logs.txt", CREATE or MODIFY) {
+
+    override fun onEvent(event: Int, path: String?) {
+        if (event == CREATE || event == MODIFY) {
+            callback()
+        }
+    }
+}
+

@@ -6,7 +6,6 @@ plugins {
 android {
     namespace = "com.example.broadcast_worker"
     compileSdk = 34
-
     defaultConfig {
         applicationId = "com.example.broadcast_worker"
         minSdk = 24

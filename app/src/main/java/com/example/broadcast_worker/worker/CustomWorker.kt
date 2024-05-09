@@ -7,6 +7,11 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.delay
+import org.json.JSONObject
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class CustomWorker constructor(
     context_: Context,
@@ -30,6 +35,15 @@ class CustomWorker constructor(
                 Log.d("worker_airplane", "AirPlane mode is OFF and Bluetooth is OFF ")
             }
         }
+        val logFile = File(special_context.filesDir, "logs.txt")
+        val jsonObject = JSONObject()
+        jsonObject.put("time", SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
+            Date(System.currentTimeMillis())
+        ))
+        jsonObject.put("bluetooth", isBluetoothOn(special_context))
+        jsonObject.put("airplane", isAirplaneModeOn(special_context))
+        val jsonString = jsonObject.toString() + "\n"
+        logFile.appendText(jsonString)
         return Result.success()
     }
 
@@ -62,3 +76,6 @@ fun isBluetoothOn(context: Context): Boolean {
         ) !== 0
     }
 }
+
+
+
